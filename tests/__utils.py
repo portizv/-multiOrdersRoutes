@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
-from utils import group_orders, BigQueryManager, get_OMS_query, norm_address, show_data_frame_as_tabulate
-from configs import PATH_TESTS_INPUTS, IDX_COL_IN, PATH_MAIN
+from utils import group_orders, BigQueryManager, get_OMS_query, norm_address, from_ordinal
+from configs import PATH_TESTS_INPUTS, IDX_COL_IN, PATH_MAIN, DATE_COL
 import json
 
 f = open(PATH_MAIN / 'tc-sc-bi-bigdata-corp-tsod-dev-d72f9644a685.json')
@@ -9,10 +9,18 @@ cred_json = json.load(f)
 
 
 class utils(unittest.TestCase):
+
+    def test_from_ordinal(self):
+        test = pd.read_excel(PATH_TESTS_INPUTS / "testRegions01.xlsx")
+        res = test[DATE_COL].apply(lambda x: from_ordinal(x).date())
+        self.assertEqual(str(res.max()), "2022-05-28")
+        self.assertEqual(str(res.min()), "2022-05-09")
+
     def test_group_orders(self):
         df_orders = pd.read_excel(PATH_TESTS_INPUTS / "testRegions01.xlsx")
         gb_orders = group_orders(df_orders=df_orders, idx_col=IDX_COL_IN, cred_json=cred_json)
         self.assertEqual(len(df_orders), len(gb_orders))
+        self.assertEqual(len(gb_orders[gb_orders["is_multi"] > 0]) > 1, True)
 
     def test_BigQueryManager(self):
         qry = """SELECT

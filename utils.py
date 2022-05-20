@@ -8,7 +8,11 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 from tabulate import tabulate
 
-from configs import IDX_COL_IN, IND_COL_QRY, SPANISH_SPECIAL, ADDRESS_COL
+from configs import IDX_COL_IN, IND_COL_QRY, SPANISH_SPECIAL, ADDRESS_COL, DATE_COL, EPOCH
+
+
+def from_ordinal(ordinal, _epoch=EPOCH):
+    return _epoch + datetime.timedelta(days=ordinal - 2)
 
 
 def show_data_frame_as_tabulate(data_frame, show_first=25, float_decimals=-1):
@@ -106,12 +110,13 @@ def norm_address(address):
     return address_norm
 
 
-def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col=ADDRESS_COL):
-    #TODO: Parse dates
+def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col=ADDRESS_COL, date_col=DATE_COL):
     df_orders_multi_dlv = df_orders.copy()
     bqm = BigQueryManager(cred_json=cred_json, verbose=1)
-    dtf = datetime.datetime.fromtimestamp(time.time()).date()
-    dti = dtf - datetime.timedelta(days=7)
+    df_orders_multi_dlv[date_col] = df_orders_multi_dlv[date_col].apply(lambda x: from_ordinal(x).date())
+    dts = df_orders_multi_dlv[date_col].unique()
+    dtf = dts.max()
+    dti = dts.min()
     idxs = df_orders[idx_col].unique()
     query = get_OMS_query(dti=dti, dtf=dtf, idxs=idxs)
     df_oms = bqm.read_data_gbq(query=query)

@@ -1,5 +1,7 @@
 from pathlib import Path
 import os
+import datetime
+
 
 PATH_MAIN = Path(os.path.dirname(__file__))
 PATH_STATICS = PATH_MAIN / "statics"
@@ -10,8 +12,10 @@ PATH_TESTS_INPUTS = PATH_TESTS / "inputs"
 IDX_COL_IN = "SOC"
 IND_COL_QRY = "SUBORDEN"
 ADDRESS_COL = "D_ADDRESS_1"
+DATE_COL = "RANGOFECHAPACTADA"
 
 SPANISH_SPECIAL = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", "ñ": "n"}
+EPOCH = datetime.datetime(1900, 1, 1)
 
 if __name__ == '__main__':
     print("the main path is: {}".format(PATH_MAIN))
