@@ -17,8 +17,10 @@ def get_response(request, cred):
         response = request.copy()
     return response
 
+
 def callback():
     st.session_state.button_clicked = True
+
 
 if "button_clicked" not in st.session_state:
     st.session_state.button_clicked = False
@@ -41,6 +43,7 @@ if st.button("Go", on_click=callback) or st.session_state.button_clicked:
         data_frame_response = get_response(data_frame_request, cred_json)
 
         tmp_download_link = data_frame_to_excel_download_link(data_frame=data_frame_response,
-                                                              download_file_name="results_{}.xlsx".format(datetime.now().strftime("%Y%m%d%H%M%S")))
+                                                              download_file_name="results_{}.xlsx".format(
+                                                                  datetime.now().strftime("%Y%m%d%H%M%S")))
         st.markdown(tmp_download_link, unsafe_allow_html=True)
         st.balloons()
