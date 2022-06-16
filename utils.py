@@ -110,7 +110,8 @@ def norm_address(address):
     return address_norm
 
 
-def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col=ADDRESS_COL, date_col=DATE_COL):
+def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col=ADDRESS_COL, date_col=DATE_COL,
+                 min_size=150, batch_th=1, col_multi_name="is_multi"):
     df_orders_multi_dlv = df_orders.copy()
     bqm = BigQueryManager(cred_json=cred_json, verbose=1)
     df_orders_multi_dlv[date_col] = df_orders_multi_dlv[date_col].apply(lambda x: from_ordinal(x).date())
@@ -122,15 +123,31 @@ def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col
     df_oms = bqm.read_data_gbq(query=query)
     df_oms_multi = df_orders_multi_dlv[[idx_col]].merge(df_oms, left_on=idx_col, right_on=IND_COL_QRY, how="inner")
     df_oms_multi[address_col] = df_oms_multi[address_col].apply(lambda x: norm_address(x))
-    df_oms_multi["is_multi"] = 1
-    df_oms_multi = df_oms_multi.groupby(by=[IND_COL_QRY, address_col], as_index=False)["is_multi"].sum()
-    df_oms_multi["is_multi"] = df_oms_multi["is_multi"].apply(lambda x: int(x > 1))
-    df_orders = df_orders.merge(df_oms_multi[[IND_COL_QRY, "is_multi"]], left_on=idx_col, right_on=IND_COL_QRY,
+    df_oms_multi.loc[:, "n_multi"] = 1
+    df_oms_multi = df_oms_multi.groupby(by=[IND_COL_QRY, address_col], as_index=False)["n_multi"].sum()
+
+    # df_oms_multi[col_multi_name] = df_oms_multi["is_multi"].apply(lambda x: int(x > 1))
+    df_orders = df_orders.merge(df_oms_multi[[IND_COL_QRY, "n_multi"]], left_on=idx_col, right_on=IND_COL_QRY,
                                 how="left")
     df_orders.drop(columns=[IND_COL_QRY], inplace=True)
-    df_orders["is_multi"].fillna(inplace=True, value=0)
 
-    return df_orders
+    n_multi = len(df_oms_multi[df_oms_multi["n_multi"] > 1])
+    df_orders["n_multi"].fillna(inplace=True, value=0)
+
+    df_orders.sort_values(by="n_multi", ascending=False, inplace=True)
+
+    n_to_select = min(n_multi // min_size, batch_th)*min_size
+    if n_to_select == 0:
+        n_to_select = n_multi
+
+    df_orders_multi_cand = df_orders.iloc[:n_to_select, :]
+    df_orders_no_multi = df_orders.iloc[n_to_select:, :]
+    df_orders_multi_cand.loc[:, col_multi_name] = 1
+    df_orders_no_multi.loc[:, col_multi_name] = 0
+
+    df_orders_final = df_orders_multi_cand.append(df_orders_no_multi, ignore_index=True)
+
+    return df_orders_final
 
 
 def data_frame_to_excel_engine(data_frame):
