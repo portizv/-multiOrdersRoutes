@@ -31,3 +31,10 @@ Special version for Streamlit-cloud
 pandas==1.3.5
 numpy==1.21.6
 ```
+
+Forbidden packages for Streamlit-cloud
+
+```bash
+pywin32
+
+```
