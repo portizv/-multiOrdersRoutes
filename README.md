@@ -36,5 +36,5 @@ Forbidden packages for Streamlit-cloud
 
 ```bash
 pywin32
-
+pywinpty
 ```
