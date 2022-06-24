@@ -1,17 +1,23 @@
 import base64
 import datetime
-import time
 from io import BytesIO
-
 import pandas as pd
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from tabulate import tabulate
-
 from configs import IDX_COL_IN, IND_COL_QRY, SPANISH_SPECIAL, ADDRESS_COL, DATE_COL, EPOCH
 
 
 def from_ordinal(ordinal, _epoch=EPOCH):
+    """
+    Format datetime
+    :param ordinal: raw datetime to be formatted
+    :type ordinal: float
+    :param _epoch: datetime from epoch
+    :type _epoch: datetime
+    :return: datetime result
+    :rtype: datetime
+    """
     return _epoch + datetime.timedelta(days=ordinal - 2)
 
 
@@ -39,13 +45,36 @@ def show_data_frame_as_tabulate(data_frame, show_first=25, float_decimals=-1):
 
 
 class BigQueryManager:
+    """
+    Manager of the interactions with GCP linked account in the project.
+    """
     def __init__(self, cred_json=None, verbose=0):
+        """
+        Constructor of the class. You can initiate using a cred path (using cred_path) or directly with the credentials (cred_json).
+        :param cred_json: GCP credential
+        :type cred_json: dict
+        :param verbose:regularize the number of printed logs
+        :type verbose: int
+        """
         credentials = service_account.Credentials.from_service_account_info(cred_json)
         self.client = bigquery.Client(location="US", credentials=credentials, project=cred_json["project_id"],
                                       default_query_job_config={})
         self.verbose = verbose
 
     def load_data_gbq(self, data, table_name, data_set, replace=False, show_table=False):
+        """
+        Load a pd.DataFrame to Google Big Query (GBQ)
+        :param data_set: name of data set
+        :type data_set: str
+        :param data: data to load
+        :type data: pd.DataFrame
+        :param table_name: name of the table to load in GBQ
+        :type table_name: str
+        :param replace: True to replace if the table already exists
+        :type replace: bool
+        :param show_table: print the log of the execution
+        :type show_table: bool
+        """
         n = len(data)
         dataset = self.client.get_dataset(data_set)
         table_ref = dataset.table(table_name)
@@ -60,6 +89,19 @@ class BigQueryManager:
             show_data_frame_as_tabulate(data_frame=data, show_first=5)
 
     def read_data_gbq(self, query, show_table=False, as_json=False, idx_col=None):
+        """
+        Download a GBQ table to a pd.DataFrame
+        :param query: query to get the table
+        :type query: str
+        :param show_table: print the log of the execution
+        :type show_table: bool
+        :param as_json: if you want to transform output as dictionary instead of pd.DataFrame
+        :type as_json: bool
+        :param idx_col: column name of the index (if None generate a default index)
+        :type idx_col: str
+        :return: respective table
+        :rtype: pd.DataFrame
+        """
         query_fmt = "".join([c for c in query if c.isnumeric() or c.isalpha()])
         query_fmt_lmts = min(15, int(len(query_fmt) * 0.25))
         if self.verbose > 2:
@@ -84,6 +126,19 @@ class BigQueryManager:
 
 
 def get_OMS_query(dti, dtf, idxs, idx_qry=IND_COL_QRY):
+    """
+    Build parametrize query in order to get important data
+    :param dti: start of the range date
+    :type dti: str
+    :param dtf: end of the range date
+    :type dtf: str
+    :param idxs: valuos of rows that need to be queried
+    :type idxs: list
+    :param idx_qry: index column name of the query output
+    :type idx_qry: str
+    :return:
+    :rtype:
+    """
     idxs_fmmt_inside = ""
     for i, idx in enumerate(idxs):
         if i + 1 == len(idxs):
@@ -104,6 +159,13 @@ def get_OMS_query(dti, dtf, idxs, idx_qry=IND_COL_QRY):
 
 
 def norm_address(address):
+    """
+    Change address to a normalized way
+    :param address: raw address
+    :type address: str
+    :return: normalized address
+    :rtype: str
+    """
     address_norm = "".join([c for c in " ".join(address.lower().split()) if c == " " or c.isalpha() or c.isnumeric()])
     for c, rc in SPANISH_SPECIAL.items():
         address_norm = address_norm.replace(c, rc)
@@ -112,6 +174,27 @@ def norm_address(address):
 
 def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col=ADDRESS_COL, date_col=DATE_COL,
                  min_size=150, batch_th=1, col_multi_name="is_multi"):
+    """
+    Logic to join multi-orders point candidates.
+    :param df_orders: Set of orders to apply the logic
+    :type df_orders: pd.DataFrame
+    :param idx_col: Column name of table index
+    :type idx_col: str
+    :param cred_json: GCP credential
+    :type cred_json: dict
+    :param address_col: Column name of raw address
+    :type address_col: str
+    :param date_col: Name of column of dates
+    :type date_col: str
+    :param min_size: minimum size of point by routes
+    :type min_size: int
+    :param batch_th: maximum number of routes with multi-orders
+    :type batch_th: int
+    :param col_multi_name: name of label of columns to write number of multi-orders
+    :type col_multi_name: str
+    :return: Table with the columns to indicate if there are multi-orders
+    :rtype: pd.DataFrame
+    """
     df_orders_multi_dlv = df_orders.copy()
     bqm = BigQueryManager(cred_json=cred_json, verbose=1)
     df_orders_multi_dlv[date_col] = df_orders_multi_dlv[date_col].apply(lambda x: from_ordinal(x).date())
@@ -125,32 +208,30 @@ def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col
     df_oms_multi[address_col] = df_oms_multi[address_col].apply(lambda x: norm_address(x))
     df_oms_multi.loc[:, "n_multi"] = 1
     df_oms_multi = df_oms_multi.groupby(by=[IND_COL_QRY, address_col], as_index=False)["n_multi"].sum()
-
-    # df_oms_multi[col_multi_name] = df_oms_multi["is_multi"].apply(lambda x: int(x > 1))
-    df_orders = df_orders.merge(df_oms_multi[[IND_COL_QRY, "n_multi"]], left_on=idx_col, right_on=IND_COL_QRY,
-                                how="left")
+    df_orders = df_orders.merge(df_oms_multi[[IND_COL_QRY, "n_multi"]], left_on=idx_col, right_on=IND_COL_QRY, how="left")
     df_orders.drop(columns=[IND_COL_QRY], inplace=True)
-
     n_multi = len(df_oms_multi[df_oms_multi["n_multi"] > 1])
     df_orders["n_multi"].fillna(inplace=True, value=0)
-
     df_orders.sort_values(by="n_multi", ascending=False, inplace=True)
-
     n_to_select = min(n_multi // min_size, batch_th)*min_size
     if n_to_select == 0:
         n_to_select = n_multi
-
     df_orders_multi_cand = df_orders.iloc[:n_to_select, :]
     df_orders_no_multi = df_orders.iloc[n_to_select:, :]
     df_orders_multi_cand.loc[:, col_multi_name] = 1
     df_orders_no_multi.loc[:, col_multi_name] = 0
-
     df_orders_final = df_orders_multi_cand.append(df_orders_no_multi, ignore_index=True)
-
     return df_orders_final
 
 
 def data_frame_to_excel_engine(data_frame):
+    """
+    Transform dataframe to a excel file in order to be exported
+    :param data_frame: dataframe to be transformed
+    :type data_frame: pd.DataFrame
+    :return: excel file
+    :rtype: BytesIO
+    """
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     data_frame.to_excel(writer, sheet_name='Sheet1')
@@ -161,6 +242,17 @@ def data_frame_to_excel_engine(data_frame):
 
 def data_frame_to_excel_download_link(data_frame=pd.DataFrame(), download_file_name='results.xlsx',
                                       download_button_message='Download file as xlsx'):
+    """
+    Transform dataframe to a link to be downloaded
+    :param data_frame: dataframe to be transformed
+    :type data_frame: pd.DataFrame
+    :param download_file_name: name of the file
+    :type download_file_name: str
+    :param download_button_message: name of the button link
+    :type download_button_message: str
+    :return: downloadable link
+    :rtype: str
+    """
     val = data_frame_to_excel_engine(data_frame)
     b64 = base64.b64encode(val)
     return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download={download_file_name}>{download_button_message}</a>'
