@@ -1,10 +1,10 @@
 import unittest
 import pandas as pd
 from utils import group_orders, BigQueryManager, get_OMS_query, norm_address, from_ordinal
-from configs import PATH_TESTS_INPUTS, IDX_COL_IN, PATH_MAIN, DATE_COL
+from configs import PATH_TESTS_INPUTS, IDX_COL_IN, PATH_MAIN, DATE_COL, JSON_NAME
 import json
 
-f = open(PATH_MAIN / 'tc-sc-bi-bigdata-corp-tsod-dev-d72f9644a685.json')
+f = open(PATH_MAIN / JSON_NAME)
 cred_json = json.load(f)
 
 

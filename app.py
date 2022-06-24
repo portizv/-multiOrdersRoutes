@@ -5,7 +5,7 @@ from PIL import Image
 from configs import PATH_IMAGES
 from datetime import datetime
 
-DFLT_SIZE = 120
+DFLT_SIZE = 125
 DFLT_BTCH = 1
 
 
@@ -22,7 +22,6 @@ def get_response(request, cred, min_size=DFLT_SIZE, batch_th=DFLT_BTCH):
 
 def callback():
     st.session_state.button_clicked = True
-
 
 if "button_clicked" not in st.session_state:
     st.session_state.button_clicked = False

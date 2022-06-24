@@ -8,12 +8,12 @@ PATH_STATICS = PATH_MAIN / "statics"
 PATH_IMAGES = PATH_STATICS / "images"
 PATH_TESTS = PATH_MAIN / "tests"
 PATH_TESTS_INPUTS = PATH_TESTS / "inputs"
+JSON_NAME = "tc-sc-bi-bigdata-corp-tsod-dev-6a664c150699.json"
 
 IDX_COL_IN = "SOC"
 IND_COL_QRY = "SUBORDEN"
 ADDRESS_COL = "D_ADDRESS_1"
 DATE_COL = "RANGOFECHAPACTADA"
-
 SPANISH_SPECIAL = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", "ñ": "n"}
 EPOCH = datetime.datetime(1900, 1, 1)
 
