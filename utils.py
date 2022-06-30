@@ -147,22 +147,25 @@ def get_OMS_query(dti, dtf, idxs, idx_qry=IND_COL_QRY):
             break
         idxs_fmmt_inside += "'{}',".format(idx)
     idxs_fmmt = "({})".format(idxs_fmmt_inside)
-
+    # TODO: agregar D_ADDRESS_2 para numeración de calles
     return """SELECT
-              distinct CAST({} as int) as {}, D_ADDRESS_1
+               DISTINCT CAST(SUBORDEN AS INT64) AS SUBORDEN,
+               CONCAT(D_ADDRESS_1, " ",D_ADDRESS_2)  AS D_ADDRESS_1
             FROM
               `tc-sc-bi-bigdata-corp-tsod-dev.sandbox_building_type_recognition.oms_raw_data`
             WHERE
               DATE(F_CREACION) BETWEEN "{}"
               AND "{}"
               AND {} IN {};
-    """.format(idx_qry, idx_qry, dti, dtf, idx_qry, idxs_fmmt)
+    """.format(dti, dtf, idx_qry, idxs_fmmt)
+
 
 def contain_num(w):
     for c in w:
         if c.isnumeric:
             return True
     return False
+
 
 def norm_address(address):
     """
@@ -183,7 +186,6 @@ def norm_address(address):
             break
         res.append(w)
     return " ".join(res)
-
 
 
 def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col=ADDRESS_COL, date_col=DATE_COL,

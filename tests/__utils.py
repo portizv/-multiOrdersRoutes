@@ -36,9 +36,11 @@ class utils(unittest.TestCase):
         self.assertEqual(len(res), 10)
 
     def test_get_OMS_query(self):
-        query = get_OMS_query(dti="2022-05-01", dtf="2022-05-31", idxs=("118753577", "118777716"))
+        query = get_OMS_query(dti="2022-05-01", dtf="2022-05-31", idxs=('149055431437', '149055374742'))
         print(query)
-        self.assertEqual(1, 1)
+        bqm = BigQueryManager(cred_json=cred_json)
+        res = bqm.read_data_gbq(query=query)
+        self.assertEqual(len(res), 2)
 
     def test_norm_address(self):
         test_address = [("Av.  providencia #123", "av providencia 123"),
