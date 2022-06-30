@@ -5,7 +5,7 @@ import pandas as pd
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from tabulate import tabulate
-from configs import IDX_COL_IN, IND_COL_QRY, SPANISH_SPECIAL, ADDRESS_COL, DATE_COL, EPOCH
+from configs import IDX_COL_IN, IND_COL_QRY, SPANISH_SPECIAL, ADDRESS_COL, DATE_COL, EPOCH, BULDING_KWS
 
 
 def from_ordinal(ordinal, _epoch=EPOCH):
@@ -48,6 +48,7 @@ class BigQueryManager:
     """
     Manager of the interactions with GCP linked account in the project.
     """
+
     def __init__(self, cred_json=None, verbose=0):
         """
         Constructor of the class. You can initiate using a cred path (using cred_path) or directly with the credentials (cred_json).
@@ -157,6 +158,11 @@ def get_OMS_query(dti, dtf, idxs, idx_qry=IND_COL_QRY):
               AND {} IN {};
     """.format(idx_qry, idx_qry, dti, dtf, idx_qry, idxs_fmmt)
 
+def contain_num(w):
+    for c in w:
+        if c.isnumeric:
+            return True
+    return False
 
 def norm_address(address):
     """
@@ -169,7 +175,15 @@ def norm_address(address):
     address_norm = "".join([c for c in " ".join(address.lower().split()) if c == " " or c.isalpha() or c.isnumeric()])
     for c, rc in SPANISH_SPECIAL.items():
         address_norm = address_norm.replace(c, rc)
-    return address_norm
+
+    address_norm_split = address_norm.split()
+    res = []
+    for i, w in enumerate(address_norm_split):
+        if w in BULDING_KWS and len(res) > 1:
+            break
+        res.append(w)
+    return " ".join(res)
+
 
 
 def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col=ADDRESS_COL, date_col=DATE_COL,
@@ -208,12 +222,13 @@ def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col
     df_oms_multi[address_col] = df_oms_multi[address_col].apply(lambda x: norm_address(x))
     df_oms_multi.loc[:, "n_multi"] = 1
     df_oms_multi = df_oms_multi.groupby(by=[IND_COL_QRY, address_col], as_index=False)["n_multi"].sum()
-    df_orders = df_orders.merge(df_oms_multi[[IND_COL_QRY, "n_multi"]], left_on=idx_col, right_on=IND_COL_QRY, how="left")
+    df_orders = df_orders.merge(df_oms_multi[[IND_COL_QRY, "n_multi"]], left_on=idx_col, right_on=IND_COL_QRY,
+                                how="left")
     df_orders.drop(columns=[IND_COL_QRY], inplace=True)
     n_multi = len(df_oms_multi[df_oms_multi["n_multi"] > 1])
     df_orders["n_multi"].fillna(inplace=True, value=0)
     df_orders.sort_values(by="n_multi", ascending=False, inplace=True)
-    n_to_select = min(n_multi // min_size, batch_th)*min_size
+    n_to_select = min(n_multi // min_size, batch_th) * min_size
     if n_to_select == 0:
         n_to_select = n_multi
     df_orders_multi_cand = df_orders.iloc[:n_to_select, :]

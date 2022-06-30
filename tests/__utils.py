@@ -42,11 +42,14 @@ class utils(unittest.TestCase):
 
     def test_norm_address(self):
         test_address = [("Av.  providencia #123", "av providencia 123"),
-                        ("PERÉZ ÑAÑÉZ      N11", "perez nanez n11")]
+                        ("PERÉZ ÑAÑÉZ      N11", "perez nanez n11"),
+                        ("Hamlet #4340 dpto 706", "hamlet 4340"),
+                        ("avda. los Trapenses 155 bloque B3", "avda los trapenses 155")]
         for ta in test_address:
             val = ta[0]
             exp = ta[1]
-            self.assertEqual(norm_address(address=val), exp)
+            res = norm_address(address=val)
+            self.assertEqual(res, exp)
 
 
 if __name__ == '__main__':
