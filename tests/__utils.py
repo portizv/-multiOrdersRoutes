@@ -17,10 +17,19 @@ class utils(unittest.TestCase):
         self.assertEqual(str(res.min()), "2022-05-09")
 
     def test_group_orders(self):
-        df_orders = pd.read_excel(PATH_TESTS_INPUTS / "testRegions01.xlsx")
-        gb_orders = group_orders(df_orders=df_orders, idx_col=IDX_COL_IN, cred_json=cred_json)
-        self.assertEqual(len(df_orders), len(gb_orders))
-        self.assertEqual(len(gb_orders[gb_orders["is_multi"] > 0]) > 1, True)
+        paths = [("testRegions01.xlsx", "SOC", "RANGOFECHAPACTADA"), ("testRegions02.xlsx", "SUBORDEN", "FECHA")]
+        for i, p in enumerate(paths):
+            pth = p[0]
+            sub_col = p[1]
+            dt_col = p[2]
+
+            print("Testing {}: {}".format(i, pth))
+            df_orders = pd.read_excel(PATH_TESTS_INPUTS / pth)
+            gb_orders = group_orders(df_orders=df_orders, idx_col=sub_col, cred_json=cred_json,
+                                     date_col=dt_col)
+            self.assertEqual(len(df_orders), len(gb_orders))
+            self.assertEqual(len(gb_orders[gb_orders["is_multi"] > 0]) > 1, True)
+            print("DONE")
 
     def test_BigQueryManager(self):
         qry = """SELECT
@@ -36,17 +45,22 @@ class utils(unittest.TestCase):
         self.assertEqual(len(res), 10)
 
     def test_get_OMS_query(self):
-        query = get_OMS_query(dti="2022-05-01", dtf="2022-05-31", idxs=("118753577", "118777716"))
+        query = get_OMS_query(dti="2022-05-01", dtf="2022-05-31", idxs=('149055431437', '149055374742'))
         print(query)
-        self.assertEqual(1, 1)
+        bqm = BigQueryManager(cred_json=cred_json)
+        res = bqm.read_data_gbq(query=query)
+        self.assertEqual(len(res), 2)
 
     def test_norm_address(self):
         test_address = [("Av.  providencia #123", "av providencia 123"),
-                        ("PERÉZ ÑAÑÉZ      N11", "perez nanez n11")]
+                        ("PERÉZ ÑAÑÉZ      N11", "perez nanez n11"),
+                        ("Hamlet #4340 dpto 706", "hamlet 4340"),
+                        ("avda. los Trapenses 155 bloque B3", "avda los trapenses 155")]
         for ta in test_address:
             val = ta[0]
             exp = ta[1]
-            self.assertEqual(norm_address(address=val), exp)
+            res = norm_address(address=val)
+            self.assertEqual(res, exp)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 import datetime
 
-
 PATH_MAIN = Path(os.path.dirname(__file__))
 PATH_STATICS = PATH_MAIN / "statics"
 PATH_IMAGES = PATH_STATICS / "images"
@@ -10,12 +9,49 @@ PATH_TESTS = PATH_MAIN / "tests"
 PATH_TESTS_INPUTS = PATH_TESTS / "inputs"
 JSON_NAME = "tc-sc-bi-bigdata-corp-tsod-dev-6a664c150699.json"
 
-IDX_COL_IN = "SOC"
+IDX_COL_IN = "SUBORDEN"
 IND_COL_QRY = "SUBORDEN"
 ADDRESS_COL = "D_ADDRESS_1"
+<<<<<<< HEAD
 DATE_COL = "RANGOFECHAPACTADA"
+=======
+DATE_COL = "FECHA"
+
+>>>>>>> 86c20ffea9b65cd004339d6b4173bbeeaab3bb7e
 SPANISH_SPECIAL = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", "ñ": "n"}
 EPOCH = datetime.datetime(1900, 1, 1)
+
+BULDING_KWS = ["departamento",
+               "dpto",
+               "depto",
+               "dp",
+               "depa",
+               "dep",
+               "apto",
+               "torre",
+               "torres",
+               "piso",
+               "pisos",
+               "edi",
+               "edificio",
+               "oficina",
+               "local",
+               "comercial",
+               "of",
+               "ofi",
+               "loc"
+               "condominio",
+               "pasaje",
+               "psje",
+               "pje",
+               "int",
+               "block",
+               "bloque",
+               "interior",
+               "casa",
+               "cas",
+               "cabaña",
+               "cond"]
 
 if __name__ == '__main__':
     print("the main path is: {}".format(PATH_MAIN))
