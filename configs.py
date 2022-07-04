@@ -12,12 +12,8 @@ JSON_NAME = "tc-sc-bi-bigdata-corp-tsod-dev-6a664c150699.json"
 IDX_COL_IN = "SUBORDEN"
 IND_COL_QRY = "SUBORDEN"
 ADDRESS_COL = "D_ADDRESS_1"
-<<<<<<< HEAD
-DATE_COL = "RANGOFECHAPACTADA"
-=======
 DATE_COL = "FECHA"
 
->>>>>>> 86c20ffea9b65cd004339d6b4173bbeeaab3bb7e
 SPANISH_SPECIAL = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", "ñ": "n"}
 EPOCH = datetime.datetime(1900, 1, 1)
 

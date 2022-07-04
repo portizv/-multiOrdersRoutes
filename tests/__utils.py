@@ -12,7 +12,7 @@ class utils(unittest.TestCase):
 
     def test_from_ordinal(self):
         test = pd.read_excel(PATH_TESTS_INPUTS / "testRegions01.xlsx")
-        res = test[DATE_COL].apply(lambda x: from_ordinal(x).date())
+        res = test['RANGOFECHAPACTADA'].apply(lambda x: from_ordinal(x))
         self.assertEqual(str(res.max()), "2022-05-28")
         self.assertEqual(str(res.min()), "2022-05-09")
 
