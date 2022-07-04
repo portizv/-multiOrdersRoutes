@@ -6,7 +6,7 @@ from configs import PATH_IMAGES
 from datetime import datetime
 from configs import IDX_COL_IN, DATE_COL
 
-DFLT_SIZE = 125
+DFLT_SIZE = 120
 DFLT_BTCH = 1
 
 

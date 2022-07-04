@@ -51,7 +51,7 @@ def show_data_frame_as_tabulate(data_frame, show_first=25, float_decimals=-1):
         tabulate_table = tabulate(data_frame.iloc[0:max_rows], headers="keys", tablefmt="psql", missingval="?",
                                   numalign="right")
     # print("Showing {}/{} rows and {} columns".format(max_rows, n_rows, n_cols))
-    print(tabulate_table)
+    # print(tabulate_table)
 
 
 class BigQueryManager:
@@ -251,13 +251,8 @@ def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col
     df_orders_multi_cand.loc[:, col_multi_name] = 1
     df_orders_no_multi.loc[:, col_multi_name] = 0
     df_orders_final = df_orders_multi_cand.append(df_orders_no_multi, ignore_index=True)
-<<<<<<< HEAD
     # print("Total multi: {}/{} ({}%)".format(n_to_select, len(df_orders),
     #                                         n_to_select*100/len(df_orders)))
-=======
-    print("Total multi: {}/{} ({}%)".format(n_to_select, len(df_orders),
-                                            n_to_select * 100 / len(df_orders)))
->>>>>>> 75109282822aeaa6d1352c17086ade6aef61bfa0
     return df_orders_final
 
 
