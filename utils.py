@@ -239,7 +239,7 @@ def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col
     df_oms_multi = df_oms_multi.merge(df_oms_multi_aux, on=address_col, how="left")
     df_orders = df_orders.merge(df_oms_multi[[IND_COL_QRY, "n_multi"]], left_on=idx_col, right_on=IND_COL_QRY,
                                 how="left")
-    df_orders.drop(columns=[IND_COL_QRY], inplace=True)
+    # df_orders.drop(columns=[IND_COL_QRY], inplace=True)
     n_multi = len(df_oms_multi[df_oms_multi["n_multi"] > 1])
     df_orders["n_multi"].fillna(inplace=True, value=0)
     df_orders.sort_values(by="n_multi", ascending=False, inplace=True)
@@ -252,7 +252,7 @@ def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col
     df_orders_no_multi.loc[:, col_multi_name] = 0
     df_orders_final = df_orders_multi_cand.append(df_orders_no_multi, ignore_index=True)
     print("Total multi: {}/{} ({}%)".format(n_to_select, len(df_orders),
-                                            n_to_select*100/len(df_orders)))
+                                            n_to_select * 100 / len(df_orders)))
     return df_orders_final
 
 
