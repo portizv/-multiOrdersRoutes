@@ -22,13 +22,16 @@ class utils(unittest.TestCase):
             pth = p[0]
             sub_col = p[1]
             dt_col = p[2]
-
             print("Testing {}: {}".format(i, pth))
             df_orders = pd.read_excel(PATH_TESTS_INPUTS / pth)
             gb_orders = group_orders(df_orders=df_orders, idx_col=sub_col, cred_json=cred_json,
                                      date_col=dt_col)
             self.assertEqual(len(df_orders), len(gb_orders))
             self.assertEqual(len(gb_orders[gb_orders["is_multi"] > 0]) > 1, True)
+            for c in df_orders.columns:
+                if c not in gb_orders.columns:
+                    print(c)
+                self.assertEqual(c in gb_orders.columns, True)
             print("DONE")
 
     def test_BigQueryManager(self):
