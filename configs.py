@@ -13,7 +13,7 @@ IDX_COL_IN = "SUBORDEN"
 IND_COL_QRY = "SUBORDEN"
 ADDRESS_COL = "D_ADDRESS_1"
 DATE_COL = "FECHA"
-a
+
 SPANISH_SPECIAL = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", "ñ": "n"}
 EPOCH = datetime.datetime(1900, 1, 1)
 
