@@ -17,10 +17,19 @@ class utils(unittest.TestCase):
         self.assertEqual(str(res.min()), "2022-05-09")
 
     def test_group_orders(self):
-        df_orders = pd.read_excel(PATH_TESTS_INPUTS / "testRegions01.xlsx")
-        gb_orders = group_orders(df_orders=df_orders, idx_col=IDX_COL_IN, cred_json=cred_json)
-        self.assertEqual(len(df_orders), len(gb_orders))
-        self.assertEqual(len(gb_orders[gb_orders["is_multi"] > 0]) > 1, True)
+        paths = [("testRegions01.xlsx", "SOC", "RANGOFECHAPACTADA"), ("testRegions02.xlsx", "SUBORDEN", "FECHA")]
+        for i, p in enumerate(paths):
+            pth = p[0]
+            sub_col = p[1]
+            dt_col = p[2]
+
+            print("Testing {}: {}".format(i, pth))
+            df_orders = pd.read_excel(PATH_TESTS_INPUTS / pth)
+            gb_orders = group_orders(df_orders=df_orders, idx_col=sub_col, cred_json=cred_json,
+                                     date_col=dt_col)
+            self.assertEqual(len(df_orders), len(gb_orders))
+            self.assertEqual(len(gb_orders[gb_orders["is_multi"] > 0]) > 1, True)
+            print("DONE")
 
     def test_BigQueryManager(self):
         qry = """SELECT

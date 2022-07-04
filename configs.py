@@ -8,10 +8,10 @@ PATH_IMAGES = PATH_STATICS / "images"
 PATH_TESTS = PATH_MAIN / "tests"
 PATH_TESTS_INPUTS = PATH_TESTS / "inputs"
 
-IDX_COL_IN = "SOC"
+IDX_COL_IN = "SUBORDEN"
 IND_COL_QRY = "SUBORDEN"
 ADDRESS_COL = "D_ADDRESS_1"
-DATE_COL = "RANGOFECHAPACTADA"
+DATE_COL = "FECHA"
 
 SPANISH_SPECIAL = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", "ñ": "n"}
 EPOCH = datetime.datetime(1900, 1, 1)
