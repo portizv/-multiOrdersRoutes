@@ -223,10 +223,10 @@ def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col
     """
     df_orders_multi_dlv = df_orders.copy()
     bqm = BigQueryManager(cred_json=cred_json, verbose=1)
-    df_orders_multi_dlv[date_col] = df_orders_multi_dlv[date_col].apply(lambda x: from_ordinal(x))
-    dts = df_orders_multi_dlv[date_col].unique()
-    dtf = dts.max()
-    dti = dts.min()
+    # df_orders_multi_dlv[date_col] = df_orders_multi_dlv[date_col].apply(lambda x: from_ordinal(x))
+    # dts = df_orders_multi_dlv[date_col].unique()
+    dtf = str(datetime.date.today() + datetime.timedelta(days=3))
+    dti = str(datetime.date.today() - datetime.timedelta(days=31))
     idxs = df_orders[idx_col].unique()
     query = get_OMS_query(dti=dti, dtf=dtf, idxs=idxs)
     df_oms = bqm.read_data_gbq(query=query)
@@ -246,13 +246,12 @@ def group_orders(df_orders=None, idx_col=IDX_COL_IN, cred_json=None, address_col
     n_to_select = min(n_multi // min_size, batch_th) * min_size
     if n_to_select == 0:
         n_to_select = n_multi
+    print("Total multi: {}/{} ({}%)".format(n_to_select, len(df_orders), n_to_select * 100 / len(df_orders)))
     df_orders_multi_cand = df_orders.iloc[:n_to_select, :]
     df_orders_no_multi = df_orders.iloc[n_to_select:, :]
     df_orders_multi_cand.loc[:, col_multi_name] = 1
     df_orders_no_multi.loc[:, col_multi_name] = 0
     df_orders_final = df_orders_multi_cand.append(df_orders_no_multi, ignore_index=True)
-    # print("Total multi: {}/{} ({}%)".format(n_to_select, len(df_orders),
-    #                                         n_to_select*100/len(df_orders)))
     return df_orders_final
 
 
