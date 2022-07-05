@@ -17,8 +17,14 @@ class utils(unittest.TestCase):
         self.assertEqual(str(res.min()), "2022-05-09")
 
     def test_group_orders(self):
-        paths = [("testRegions01.xlsx", "SOC", "RANGOFECHAPACTADA"), ("testRegions02.xlsx", "SUBORDEN", "FECHA")]
+        paths = [("testRegions01.xlsx", "SOC", "RANGOFECHAPACTADA"),
+                 ("testRegions02.xlsx", "SUBORDEN", "FECHA"),
+                 ("testRegions03.xlsx", "SUBORDEN", "FECHA")]
+
         for i, p in enumerate(paths):
+            if i != 2:
+                continue
+
             pth = p[0]
             sub_col = p[1]
             dt_col = p[2]
