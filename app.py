@@ -6,7 +6,7 @@ from configs import PATH_IMAGES
 from datetime import datetime
 from configs import IDX_COL_IN, DATE_COL
 
-DFLT_SIZE = 120
+DFLT_SIZE = 125
 DFLT_BTCH = 1
 
 
@@ -37,7 +37,7 @@ st.image(image)
 min_size = st.number_input(label="Cantidad minima de entregas por ruta", min_value=1, value=DFLT_SIZE)
 batch_th = st.number_input(label="Cantidad maxima de rutas con multi-entrega", min_value=1, value=DFLT_BTCH)
 idx_col_name = st.text_input(label="Nombre columa id subordernes", value=IDX_COL_IN)
-dt_col_name = st.text_input(label="Nombre columa fecha", value=DATE_COL)
+# dt_col_name = st.text_input(label="Nombre columa fecha", value=DATE_COL)
 
 file = st.file_uploader("Cargar reporte puntos a rutear", type="xlsx")
 cred_json = st.secrets["gcp_service_account"]

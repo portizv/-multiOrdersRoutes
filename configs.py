@@ -7,7 +7,7 @@ PATH_STATICS = PATH_MAIN / "statics"
 PATH_IMAGES = PATH_STATICS / "images"
 PATH_TESTS = PATH_MAIN / "tests"
 PATH_TESTS_INPUTS = PATH_TESTS / "inputs"
-JSON_NAME = "tc-sc-bi-bigdata-corp-tsod-dev-6a664c150699.json"
+JSON_NAME = "tc-sc-bi-bigdata-corp-tsod-dev-0704361637b1.json"
 
 IDX_COL_IN = "SUBORDEN"
 IND_COL_QRY = "SUBORDEN"
